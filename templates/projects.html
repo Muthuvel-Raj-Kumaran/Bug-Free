@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BUG FREE</title>
+      <div style="width: 100%; max-width: 900px; display: flex; justify-content: flex-end; margin-bottom: 10px;">
+      <form method="POST" action="/logout">
+        <button type="submit" style="
+          background-color: #dc3545;
+          border: none;
+          color: white;
+          padding: 10px 16px;
+          border-radius: 6px;
+          font-size: 15px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        ">Logout</button>
+      </form>
+    </div>
+
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+      background: #f5f7fa;
+      color: #333;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #222;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 30px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    input[type="text"], select {
+      padding: 10px 15px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      min-width: 220px;
+      flex: 1 1 220px;
+      transition: border-color 0.3s;
+    }
+    input[type="text"]:focus, select:focus {
+      border-color: #007BFF;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0,123,255,0.5);
+    }
+
+    button {
+      background-color: #007BFF;
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      min-width: 140px;
+      flex-shrink: 0;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      max-width: 900px;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    thead {
+      background-color: #007BFF;
+      color: white;
+    }
+    th, td {
+      padding: 14px 20px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      font-size: 15px;
+    }
+    tbody tr:hover {
+      background-color: #f1f8ff;
+      cursor: pointer;
+    }
+
+    /* Popup styles */
+    #popupOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #popup {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 10px;
+      width: 350px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      animation: fadeInScale 0.3s ease forwards;
+    }
+    @keyframes fadeInScale {
+      from {opacity: 0; transform: scale(0.9);}
+      to {opacity: 1; transform: scale(1);}
+    }
+    #popup h2 {
+      margin-top: 0;
+      color: #007BFF;
+      text-align: center;
+    }
+    #popup label {
+      display: block;
+      margin: 15px 0 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #555;
+    }
+    #popup input[type="text"], #popup select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      transition: border-color 0.3s;
+    }
+    #popup input[type="text"]:focus, #popup select:focus {
+      border-color: #007BFF;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0,123,255,0.5);
+    }
+    #popup .btn-group {
+      margin-top: 25px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    #popup .btn-group button {
+      flex: 1;
+      min-width: auto;
+      padding: 10px;
+      font-size: 16px;
+    }
+    #popup .btn-group button:first-child {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+    }
+    #popup .btn-group button:first-child:hover {
+      background-color: #1e7e34;
+    }
+    #popup .btn-group button:last-child {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+    }
+    #popup .btn-group button:last-child:hover {
+      background-color: #a71d2a;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .controls {
+        flex-direction: column;
+        gap: 12px;
+        max-width: 100%;
+      }
+      input[type="text"], select, button {
+        min-width: 100%;
+        flex: none;
+      }
+      table, h1 {
+        max-width: 100%;
+      }
+      #popup {
+        width: 90%;
+        max-width: 350px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>BUG FREE</h1>
+
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="Search by game name" />
+    <select id="phaseFilter" aria-label="Filter projects by phase">
+      <option value="">Filter by Phase</option>
+      <option value="Phase 1">Phase 1</option>
+      <option value="Phase 2">Phase 2</option>
+      <option value="Phase 3">Phase 3</option>
+      <option value="Phase 4">Phase 4</option>
+    </select>
+    <button id="createBtn" aria-haspopup="dialog" aria-controls="popupOverlay">Create Project</button>
+  </div>
+
+  <table id="projectsTable" aria-label="List of projects">
+    <thead>
+      <tr>
+        <th>Game Name</th>
+        <th>Phase</th>
+        <th>Categories</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Projects go here -->
+    </tbody>
+  </table>
+
+  <!-- Create Project Popup -->
+  <div id="popupOverlay" role="dialog" aria-modal="true" aria-labelledby="popupTitle" tabindex="-1">
+    <div id="popup">
+      <h2 id="popupTitle">Create Project</h2>
+      <label for="gameNameInput">Game Name:</label>
+      <input type="text" id="gameNameInput" autocomplete="off" />
+
+      <label for="phaseInput">Phase:</label>
+      <select id="phaseInput">
+        <option value="">Select Phase</option>
+        <option value="Phase 1">Phase 1</option>
+        <option value="Phase 2">Phase 2</option>
+        <option value="Phase 3">Phase 3</option>
+        <option value="Phase 4">Phase 4</option>
+      </select>
+
+      <label for="categoriesInput">Categories:</label>
+      <input type="text" id="categoriesInput" autocomplete="off" />
+
+      <div class="btn-group">
+        <button id="saveProjectBtn">Create</button>
+        <button id="cancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const phaseFilter = document.getElementById('phaseFilter');
+  const projectsTableBody = document.querySelector('#projectsTable tbody');
+  const createBtn = document.getElementById('createBtn');
+
+  const popupOverlay = document.getElementById('popupOverlay');
+  const gameNameInput = document.getElementById('gameNameInput');
+  const phaseInput = document.getElementById('phaseInput');
+  const categoriesInput = document.getElementById('categoriesInput');
+  const saveProjectBtn = document.getElementById('saveProjectBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+
+  // Load projects from backend with filters
+  function loadProjects() {
+    fetch('api/projects')
+      .then(res => res.json())
+      .then(data => {
+        const searchVal = searchInput.value.trim().toLowerCase();
+        const phaseVal = phaseFilter.value;
+
+        // Client-side filtering
+        const filteredData = data.filter(p => {
+          const matchesSearch = p.game_name.toLowerCase().includes(searchVal);
+          const matchesPhase = phaseVal ? p.phase === phaseVal : true;
+          return matchesSearch && matchesPhase;
+        });
+
+        projectsTableBody.innerHTML = '';
+        if (filteredData.length === 0) {
+          projectsTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; font-style: italic;">No projects found</td></tr>';
+          return;
+        }
+        filteredData.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${p.game_name}</td>
+            <td>${p.phase}</td>
+            <td>${p.categories}</td>
+          `;
+          tr.style.cursor = 'pointer';
+
+          tr.addEventListener('click', () => {
+            const params = new URLSearchParams();
+            params.set('game_name', p.game_name);
+            params.set('phase', p.phase);
+            window.location.href = 'dashboard.html?' + params.toString();
+          });
+
+          projectsTableBody.appendChild(tr);
+        });
+      })
+      .catch(err => {
+        console.error('Failed to fetch projects', err);
+        projectsTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Failed to load projects</td></tr>';
+      });
+  }
+
+  // Show popup
+  createBtn.onclick = () => {
+    gameNameInput.value = '';
+    phaseInput.value = '';
+    categoriesInput.value = '';
+    popupOverlay.style.display = 'flex';
+    gameNameInput.focus();
+  };
+
+  // Hide popup
+  cancelBtn.onclick = () => {
+    popupOverlay.style.display = 'none';
+  };
+
+  // Save new project
+  saveProjectBtn.onclick = () => {
+    const gameName = gameNameInput.value.trim();
+    const phase = phaseInput.value;
+    const categories = categoriesInput.value.trim();
+
+    if (!gameName) {
+      alert('Game Name is required');
+      gameNameInput.focus();
+      return;
+    }
+
+    fetch('/create_project', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_name: gameName, phase, categories })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        alert('Error: ' + data.error);
+      } else {
+        alert('Project created successfully');
+        popupOverlay.style.display = 'none';
+        loadProjects();
+      }
+    })
+    .catch(err => {
+      alert('Error creating project');
+      console.error(err);
+    });
+  };
+
+  // Load projects on search/filter change
+  searchInput.addEventListener('input', loadProjects);
+  phaseFilter.addEventListener('change', loadProjects);
+
+  // Initial load
+  loadProjects();
+  
+</script>
+
+ <script src="../static/script.js"></script>
+</body>
+</html>

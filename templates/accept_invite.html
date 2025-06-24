@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Accept Invite</title>
+  <style>
+    /* Reset and base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+    label {
+      display: block;
+      text-align: left;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: #555;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 18px;
+      border: 1.5px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus {
+      border-color: #3b82f6; /* nice blue */
+      outline: none;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #3b82f6;
+      border: none;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    #response {
+      margin-top: 20px;
+      font-size: 0.95rem;
+      color: #22c55e; /* green for success */
+      min-height: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>You're invited!</h2>
+    <form id="acceptForm">
+      <input type="hidden" id="email" name="email" />
+      <label for="name">Your Name:</label>
+      <input type="text" id="name" name="name" placeholder="Enter your full name" required />
+      <button type="submit">Accept Invite</button>
+    </form>
+    <p id="response"></p>
+  </div>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const email = urlParams.get('email');
+  document.getElementById('email').value = email;
+
+  document.getElementById('acceptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+
+    const res = await fetch('/accept_invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name })
+    });
+
+    const data = await res.json();
+    const responseEl = document.getElementById('response');
+    if (data.message) {
+      responseEl.style.color = '#22c55e'; // green
+      responseEl.innerText = data.message;
+
+      // Redirect to project page after 2 seconds
+      setTimeout(() => {
+        window.location.href = `/project?email=${encodeURIComponent(email)}`;
+      }, 2000);
+    } else {
+      responseEl.style.color = '#ef4444'; // red
+      responseEl.innerText = data.error || 'Something went wrong';
+    }
+  });
+</script>
+
+</body>
+</html>

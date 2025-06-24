@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>UNITY</title>
+  <link rel="stylesheet" href="../static/style.css" />
+</head>
+<body class="un-body">
+
+  <!-- Navbar -->
+  <div class="un-navbar">
+    <h1 class="un-navbar__title">U N I T Y</h1>
+
+    <div class="un-navbar__search">
+      <input type="text" id="searchInput" placeholder="Search..." autocomplete="off" />
+      <button class="un-btn" id="openModalBtn">Create Ticket</button>
+      <button id="clearSearchBtn" class="un-btn" title="Clear Search">Clear</button>
+    </div>
+
+    <div class="un-navbar__actions">
+      <select id="filterType" class="un-filter-select">
+        <option value="">All Types</option>
+        <option value="Task">Task</option>
+        <option value="Bug">Bug</option>
+      </select>
+      <select id="filterTeam" class="un-filter-select">
+        <option value="">All Teams</option>
+        <option value="Developer">Developer</option>
+        <option value="Tester">Tester</option>
+        <option value="BackEnd Developer">BackEnd Developer</option>
+        <option value="UI/UX">UI/UX</option>
+        <option value="UI/UX">Animation</option>
+      </select>
+
+      <button id="backToProjectBtn" class="un-btn">Back to Project</button>
+      <!-- Invite User Button (outside the modal) -->
+          <button id="openInviteBtn" class="un-btn">Invite User</button>
+
+          <!-- Invite User Modal -->
+          <div id="inviteModal" class="invite-user">
+            <div class="invite-user__content">
+              <h3 class="invite-user__title">Invite User</h3>
+              <form id="inviteForm" class="un-form">
+                <div class="invite-user-group">
+                  <label for="inviteName">Name</label>
+                  <input type="text" id="inviteName" required />
+                </div>
+                <!-- <div class="invite-user-group">
+                  <label for="inviteRole">Role</label>
+                  <input type="text" id="inviteRole" required />
+                </div> -->
+                <div class="invite-user-group">
+                  <label for="inviteEmail">Email</label>
+                  <input type="email" id="inviteEmail" required />
+                </div>
+                <div class="invite-user-actions">
+                  <button type="submit" class="un-btn un-btn--primary">Send Invite</button>
+                  <button type="button" class="invite-cancel" id="inviteCancelBtn">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+    </div>
+  </div>
+
+
+
+  <!-- Ticket Board Columns -->
+  <div class="un-board">
+    
+    <div class="un-column" id="todo">
+      <h2 class="un-column__header">To Do</h2>
+    </div>
+    <div class="un-column" id="inprocess">
+      <h2 class="un-column__header">In Process</h2>
+    </div>
+    <div class="un-column" id="inreview">
+      <h2 class="un-column__header">In Review</h2>
+    </div>
+    <div class="un-column" id="done">
+      <h2 class="un-column__header">Done</h2>
+    </div>
+    <div class="un-column" id="onhold">
+      <h2 class="un-column__header">On-Hold</h2>
+    </div>
+    <div class="un-column" id="suggestion">
+      <h2 class="un-column__header">Suggestion</h2>
+    </div>
+  </div>
+
+  <!-- Create Ticket Modal -->
+  <div id="ticketModal" class="Create-ticket" >
+    <div class="Create-ticket__content">
+      <h3 class="Create-ticket__title">Create Ticket</h3>
+      <form id="ticketForm" class="un-form" method="POST" action="/submit_ticket" enctype="multipart/form-data">
+        <div class="Create-ticket-group"><label for="project">Project</label><input type="text" id="project" name="project" required /></div>
+        <div class="Create-ticket-group"><label for="workType">Work Type</label><select id="workType" name="workType"><option>Task</option><option>Bug</option></select></div>
+        <div class="Create-ticket-group"><label for="status">Status</label><select id="status" name="status"><option>To Do</option><option>In Process</option><option>In Review</option><option>Done</option><option>On-Hold</option><option>Suggestion</option></select></div>
+        <div class="Create-ticket-group"><label for="summary">Summary</label><input type="text" id="summary" name="summary" required /></div>
+        <div class="Create-ticket-group"><label for="description">Description</label><textarea id="description" name="description" required></textarea></div>
+          
+          <select id="assigneeDropdown" name="assignee" required>
+            <option value="">Select Assignee</option>
+          </select>
+
+        <div class="Create-ticket-group">
+          <label for="team">Team</label>
+          <select id="team" name="team" required>
+            <option value="">Select Team</option>
+            <option value="Developer">Developer</option>
+            <option value="Tester">Tester</option>
+            <option value="BackEnd Developer">BackEnd Developer</option>
+            <option value="UI/UX">UI/UX</option>
+            <option value="Animation">Animation</option>
+          </select>
+        </div>
+
+          <div class="Create-ticket-group">
+            <label for="ticketGameName">Game Name</label>
+            <input type="text" id="ticketGameName" name="gameName" required />
+          </div>
+        <div class="Create-ticket-group"><label for="attachment">Attachment</label><input type="file" id="attachment" name="attachment" /></div>
+        <div class="Create-ticketactions">
+          <button type="submit" class="un-btn un-btn--primary">Create</button>
+          <button id="cancelTicketBtn" class="cancelTicketBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Ticket Detail Modal -->
+  <div id="ticketDetailModal" class="ticket-detail-modal hidden">
+    <div class="ticket-detail-modal__content">
+      <div class="ticket-detail-modal__header">
+        <h3 class="ticket-detail-modal__title">Ticket Details</h3>
+        <button id="closeDetailBtn" class="ticket-detail-modal__close-btn">✖</button>
+      </div>
+
+      <div class="ticket-detail-modal__field"><label for="detailSummary">Summary:</label><input type="text" id="detailSummary" /></div>
+      <div class="ticket-detail-modal__field"><label for="detailProject">Project:</label><input type="text" id="detailProject" /></div>
+      <div class="ticket-detail-modal__field"><label for="detailType">Type:</label><select id="detailType"><option>Task</option><option>Bug</option></select></div>
+      <div class="ticket-detail-modal__field"><label for="detailStatus">Status:</label><select id="detailStatus"><option>To Do</option><option>In Process</option><option>In Review</option><option>Done</option><option>On-Hold</option><option>Suggestion</option></select></div>
+      <div class="ticket-detail-modal__field"><label for="detailDescription">Description:</label><textarea id="detailDescription" rows="5"></textarea></div>
+        <div class="ticket-detail-modal__field">
+          <label for="detailAssignee">Assignee:</label>
+          <select id="detailAssignee" name="detailAssignee" required>
+            <option value="">Select Assignee</option>
+          </select>
+        </div>
+        <div class="ticket-detail-modal__field">
+          <label for="detailTeam">Team:</label>
+          <select id="detailTeam" name="detailTeam" required>
+            <option value="">Select Team</option>
+            <option value="Developer">Developer</option>
+            <option value="Tester">Tester</option>
+            <option value="BackEnd Developer">BackEnd Developer</option>
+            <option value="UI/UX">UI/UX</option>
+            <option value="Animation">Animation</option>
+          </select>
+        </div>
+      <div class="ticket-detail-modal__field"><label for="detailGame">Game Name:</label><input type="text" id="detailGame" /></div>
+
+      <!-- Attachment Section -->
+      <div class="ticket-detail-modal__field">
+        <label>Attachment:</label>
+        <div id="detailAttachmentsList">No attachment</div>
+        <input type="file" id="newAttachmentInput" />
+      </div>
+
+      <div class="ticket-detail-modal__actions">
+        <button id="saveTicketBtn" class="un-btn un-btn--primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../static/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+  <!-- Loader -->
+<div id="loader-overlay" class="loader-overlay" style="display: none;">
+    <div class="sk-cube-grid">
+        <div class="sk-cube sk-cube1"></div>
+        <div class="sk-cube sk-cube2"></div>
+        <div class="sk-cube sk-cube3"></div>
+        <div class="sk-cube sk-cube4"></div>
+        <div class="sk-cube sk-cube5"></div>
+        <div class="sk-cube sk-cube6"></div>
+        <div class="sk-cube sk-cube7"></div>
+        <div class="sk-cube sk-cube8"></div>
+        <div class="sk-cube sk-cube9"></div>
+    </div>
+</div>
+
+<style>
+.loader-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.8);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sk-cube-grid {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+.sk-cube {
+    width: 12px;
+    height: 12px;
+    background-color: #007bff;
+    animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+}
+.sk-cube:nth-child(1) { animation-delay: 0.2s; }
+.sk-cube:nth-child(2) { animation-delay: 0.3s; }
+.sk-cube:nth-child(3) { animation-delay: 0.4s; }
+.sk-cube:nth-child(4) { animation-delay: 0.1s; }
+.sk-cube:nth-child(5) { animation-delay: 0.2s; }
+.sk-cube:nth-child(6) { animation-delay: 0.3s; }
+.sk-cube:nth-child(7) { animation-delay: 0s; }
+.sk-cube:nth-child(8) { animation-delay: 0.1s; }
+.sk-cube:nth-child(9) { animation-delay: 0.2s; }
+
+@keyframes sk-cubeGridScaleDelay {
+    0%, 70%, 100% { transform: scale3D(1, 1, 1); }
+    35% { transform: scale3D(0, 0, 1); }
+}
+</style>
+
+
+</body>
+</html>
