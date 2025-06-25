@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # max 16MB upload
 app.secret_key = 'dev-secret-key-123'
+# app.secret_key = 'dev-secret-key-123'
 
 # DB connection info — replace with your credentials
 # DB_HOST = 'localhost'
