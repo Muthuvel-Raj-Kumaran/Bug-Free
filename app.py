@@ -42,12 +42,7 @@ app.secret_key = 'dev-secret-key-123'
 #     return psycopg2.connect(**db_config)
 
 def get_db_conn():
-    url = os.environ.get('DATABASE_URL')
-    
-    if not url:
-        raise Exception("❌ DATABASE_URL not found in environment variables.")
-
-    print("✅ DATABASE_URL found:", url)
+    url = "postgresql://postgres:ijSbqfBUrFUBdaHjJBwFKogHmNyNxlyg@postgres.railway.internal:5432/railway"
 
     from urllib.parse import urlparse
     parsed = urlparse(url)
