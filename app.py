@@ -648,7 +648,7 @@ def submit_ticket():
                     """
                     send_email(assignee_email, f"New Ticket Assigned: {summary}", html_content)
                     print(f"Email sent to {assignee_email}")
-                    
+
             except Exception as e:
                 print(f"Error sending email to assignee: {e}")
 
@@ -754,10 +754,10 @@ def delete_attachment(attachment_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
 
-# if __name__ == "__main__":
-#     port = int(os.environ.get("PORT", 5000))
-#     print("DEBUG: ENV VARS:", os.environ)
-#     app.run(host="0.0.0.0", port=port, debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    print("DEBUG: ENV VARS:", os.environ)
+    app.run(host="0.0.0.0", port=port, debug=True)
