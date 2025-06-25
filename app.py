@@ -516,7 +516,7 @@ def get_projects():
     conn = get_db_conn()
     cur = conn.cursor()
 
-    query = "SELECT id, game_name, phase, categories FROM projects WHERE organization = %s"
+    query = "SELECT id, game_name, phase, category FROM projects WHERE organization = %s"
     params = [session['organization']]
 
     if search:
@@ -535,7 +535,7 @@ def get_projects():
         "id": r[0],
         "game_name": r[1],
         "phase": r[2],
-        "categories": r[3]
+        "category": r[3]
     } for r in rows]
 
     return jsonify(projects)
@@ -548,19 +548,19 @@ def create_project():
 
     game_name = data.get('game_name', '').strip()
     phase = data.get('phase', '').strip()
-    categories = data.get('categories', '').strip()
+    category = data.get('category', '').strip()
 
     if not game_name:
         return jsonify({'error': 'Game name is required'}), 400
 
-    print(f"Creating project with: game_name={game_name}, phase={phase}, categories={categories}")
+    print(f"Creating project with: game_name={game_name}, phase={phase}, category={category}")
 
     try:
         conn = get_db_conn()
         cur = conn.cursor()
         cur.execute(
-            "INSERT INTO projects (game_name, phase, categories, organization) VALUES (%s, %s, %s, %s)",
-            (game_name, phase, categories, session['organization'])
+            "INSERT INTO projects (game_name, phase, category, organization) VALUES (%s, %s, %s, %s)",
+            (game_name, phase, category, session['organization'])
         )
 
         conn.commit()
