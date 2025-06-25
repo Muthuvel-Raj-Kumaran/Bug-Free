@@ -223,8 +223,9 @@ def register():
     name = request.form.get('name')
     email = request.form.get('email').strip().lower()
     password = request.form.get('password')
+    organization = request.form.get('organization')
 
-    if not name or not email or not password:
+    if not name or not email or not password or not organization:
         return "Missing fields", 400
 
     hashed_pw = generate_password_hash(password)
@@ -238,29 +239,31 @@ def register():
         conn.close()
         return "Email already registered", 409
 
-    cur.execute("INSERT INTO users (name, email, password, is_active) VALUES (%s, %s, %s, TRUE)", (name, email, hashed_pw))
+    cur.execute(
+        "INSERT INTO users (name, email, password, organization, is_active) VALUES (%s, %s, %s, %s, TRUE)",
+        (name, email, hashed_pw, organization)
+    )
     conn.commit()
     cur.close()
     conn.close()
 
     # Send welcome email
-#     html_body = f"""
-#     <html>
-#     <body>
-#         <p>Hi {name},</p>
-#         <p>Welcome to <strong>BUG FREE</strong>! </p>
-#         <p>Your account has been successfully created. You can now <a href="http://localhost:5000/login">login here</a>.</p>
-#         <p>Happy bug tracking!<br>The BUG FREE Team</p>
-#     </body>
-#     </html>
-#     """
+    # html_body = f"""
+    # <html>
+    # <body>
+    #     <p>Hi {name},</p>
+    #     <p>Welcome to <strong>BUG FREE</strong>! </p>
+    #     <p>Your account has been successfully created. You can now <a href="http://localhost:5000/login">login here</a>.</p>
+    #     <p>Happy bug tracking!<br>The BUG FREE Team</p>
+    # </body>
+    # </html>
+    # """
+    # try:
+    #     send_email(email, "Welcome to BUG FREE!", html_body)
+    # except Exception as e:
+    #     print(f"Failed to send welcome email: {e}")
 
-#     try:
-#         send_email(email, "Welcome to BUG FREE!", html_body)
-#     except Exception as e:
-#         print(f"Failed to send welcome email: {e}")
-
-#     return redirect('/login')
+    # return redirect('/login')
 
     html_body = f"""
     <html>
@@ -279,6 +282,7 @@ def register():
 
     return redirect('/login')
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
@@ -289,7 +293,7 @@ def login():
 
     conn = get_db_conn()
     cur = conn.cursor()
-    cur.execute("SELECT id, name, password FROM users WHERE email = %s AND is_active = TRUE", (email,))
+    cur.execute("SELECT id, name, password, organization FROM users WHERE email = %s AND is_active = TRUE", (email,))
     user = cur.fetchone()
     cur.close()
     conn.close()
@@ -297,10 +301,11 @@ def login():
     if user and check_password_hash(user[2], password):
         session['user_id'] = user[0]
         session['user_name'] = user[1]
+        session['organization'] = user[3]
         return redirect('/projects')
     else:
         return "Invalid credentials", 401
-    
+
 @app.route('/projects')
 def projects_alias():
     if 'user_id' not in session:
@@ -323,11 +328,11 @@ def get_tickets():
     cur = conn.cursor()
 
     query = """
-        SELECT id, summary, project, work_type, status, description, assignee, team, game_name
-        FROM tickets
-        WHERE 1=1
+    SELECT id, summary, project, work_type, status, description, assignee, team, game_name
+    FROM tickets
+    WHERE organization = %s
     """
-    params = []
+    params = [session['organization']]
 
     if work_type:
         query += " AND work_type = %s"
@@ -401,7 +406,7 @@ def update_ticket(ticket_id):
     conn = get_db_conn()
     cur = conn.cursor()
 
-    cur.execute("SELECT assignee, status, summary FROM tickets WHERE id = %s", (ticket_id,))
+    cur.execute("SELECT assignee, status, summary FROM tickets WHERE id = %s AND organization = %s", (ticket_id, session['organization']))
     old_ticket = cur.fetchone()
     if not old_ticket:
         cur.close()
@@ -439,8 +444,9 @@ def update_ticket(ticket_id):
 
                 cur.execute("""
                     SELECT summary, description, project, status, work_type, game_name
-                    FROM tickets WHERE id = %s
-                """, (ticket_id,))
+                    FROM tickets WHERE id = %s AND organization = %s
+                """, (ticket_id, session['organization']))
+
                 ticket_details = cur.fetchone()
 
                 if ticket_details:
@@ -483,13 +489,15 @@ def get_project_assignees():
     cur = conn.cursor()
 
     query = '''
-        SELECT users.id, users.name
-        FROM users
-        JOIN project_invitations ON users.id = project_invitations.user_id
-        WHERE project_invitations.status = 'accepted'
-        AND project_invitations.project_name = %s
+    SELECT users.id, users.name
+    FROM users
+    JOIN project_invitations ON users.id = project_invitations.user_id
+    WHERE project_invitations.status = 'accepted'
+    AND project_invitations.project_name = %s
+    AND users.organization = %s
     '''
-    cur.execute(query, (project,))
+    cur.execute(query, (project, session['organization']))
+
     rows = cur.fetchall()
 
     cur.close()
@@ -508,8 +516,8 @@ def get_projects():
     conn = get_db_conn()
     cur = conn.cursor()
 
-    query = "SELECT id, game_name, phase, category FROM projects WHERE 1=1"
-    params = []
+    query = "SELECT id, game_name, phase, category FROM projects WHERE organization = %s"
+    params = [session['organization']]
 
     if search:
         query += " AND LOWER(game_name) LIKE %s"
@@ -551,8 +559,8 @@ def create_project():
         conn = get_db_conn()
         cur = conn.cursor()
         cur.execute(
-        "INSERT INTO projects (game_name, phase, category) VALUES (%s, %s, %s)",
-        (game_name, phase, categories)
+        "INSERT INTO projects (game_name, phase, category, organization) VALUES (%s, %s, %s, %s)",
+        (game_name, phase, categories, session['organization'])
     )
 
         conn.commit()
@@ -593,11 +601,12 @@ def submit_ticket():
         cur.execute(
             """
             INSERT INTO tickets 
-            (project, work_type, status, summary, description, assignee, team, game_name)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+            (project, work_type, status, summary, description, assignee, team, game_name, organization)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
             """,
-            (project, work_type, status, summary, description, assignee, team, game_name)
+            (project, work_type, status, summary, description, assignee, team, game_name, session['organization'])
         )
+
         ticket_id = cur.fetchone()[0]
 
         files = request.files.getlist('attachment')  
@@ -772,10 +781,10 @@ def delete_attachment(attachment_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    print("DEBUG: ENV VARS:", os.environ)
-    app.run(host="0.0.0.0", port=port, debug=True)
+# if __name__ == "__main__":
+#     port = int(os.environ.get("PORT", 5000))
+#     print("DEBUG: ENV VARS:", os.environ)
+#     app.run(host="0.0.0.0", port=port, debug=True)
