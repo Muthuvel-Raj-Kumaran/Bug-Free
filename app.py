@@ -301,7 +301,7 @@ def login():
     if user and check_password_hash(user[2], password):
         session['user_id'] = user[0]
         session['user_name'] = user[1]
-        session['organization'] = user[3]
+        session['organization'] = user[3].lower()
         return redirect('/projects')
     else:
         return "Invalid credentials", 401
@@ -516,7 +516,7 @@ def get_projects():
     conn = get_db_conn()
     cur = conn.cursor()
 
-    query = "SELECT id, game_name, phase, category FROM projects WHERE organization = %s"
+    query = "SELECT id, game_name, phase, categories FROM projects WHERE organization = %s"
     params = [session['organization']]
 
     if search:
@@ -559,9 +559,9 @@ def create_project():
         conn = get_db_conn()
         cur = conn.cursor()
         cur.execute(
-        "INSERT INTO projects (game_name, phase, category, organization) VALUES (%s, %s, %s, %s)",
-        (game_name, phase, categories, session['organization'])
-    )
+            "INSERT INTO projects (game_name, phase, categories, organization) VALUES (%s, %s, %s, %s)",
+            (game_name, phase, categories, session['organization'])
+        )
 
         conn.commit()
         cur.close()
