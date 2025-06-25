@@ -78,13 +78,13 @@ def send_email(to_email, subject, html_content):
 def index():
     return redirect(url_for('register'))
 
-@app.route('/Dashboard.html')
+@app.route('/dashboard.html')
 def dashboard():
     if 'user_id' not in session:
         return redirect('/login')
     game_name = request.args.get('game_name')
     phase = request.args.get('phase')
-    return render_template('Dashboard.html', game_name=game_name, phase=phase)
+    return render_template('dashboard.html', game_name=game_name, phase=phase)
 
 @app.route('/project')
 def project():
