@@ -26,12 +26,32 @@ app.secret_key = 'dev-secret-key-123'
 #         password=DB_PASS
 #     )
 
+# def get_db_conn():
+#     url = os.environ.get('DATABASE_URL')
+#     if not url:
+#         raise Exception("DATABASE_URL not found in environment variables.")
+
+#     parsed = urlparse(url)  
+#     db_config = {
+#         'dbname': parsed.path[1:],  
+#         'user': parsed.username,
+#         'password': parsed.password,
+#         'host': parsed.hostname,
+#         'port': parsed.port
+#     }
+#     return psycopg2.connect(**db_config)
+
 def get_db_conn():
     url = os.environ.get('DATABASE_URL')
+    
     if not url:
-        raise Exception("DATABASE_URL not found in environment variables.")
+        raise Exception("❌ DATABASE_URL not found in environment variables.")
 
-    parsed = urlparse(url)  
+    print("✅ DATABASE_URL found:", url)
+
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+
     db_config = {
         'dbname': parsed.path[1:],  
         'user': parsed.username,
@@ -39,7 +59,9 @@ def get_db_conn():
         'host': parsed.hostname,
         'port': parsed.port
     }
+
     return psycopg2.connect(**db_config)
+
 
 def send_email(to_email, subject, html_content):
     import smtplib
