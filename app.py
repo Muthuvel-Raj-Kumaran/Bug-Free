@@ -6,24 +6,40 @@ from email.message import EmailMessage
 from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, session
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # max 16MB upload
 app.secret_key = 'dev-secret-key-123'
 
-# DB connection info — replace with your credentials
-DB_HOST = 'localhost'
-DB_NAME = 'JiraCloneDB'
-DB_USER = 'postgres'
-DB_PASS = 'root'
+# # DB connection info — replace with your credentials
+# DB_HOST = 'localhost'
+# DB_NAME = 'JiraCloneDB'
+# DB_USER = 'postgres'
+# DB_PASS = 'root'
 
-def get_db_conn():
-    return psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASS
-    )
+# def get_db_conn():
+#     return psycopg2.connect(
+#         host=DB_HOST,
+#         dbname=DB_NAME,
+#         user=DB_USER,
+#         password=DB_PASS
+#     )
+
+def get_connection():
+    url = os.environ.get('DATABASE_URL')
+    if not url:
+        raise Exception("DATABASE_URL not found in environment variables.")
+
+    parsed = urlparse(url)  
+    db_config = {
+        'dbname': parsed.path[1:],  
+        'user': parsed.username,
+        'password': parsed.password,
+        'host': parsed.hostname,
+        'port': parsed.port
+    }
+    return psycopg2.connect(**db_config)
 
 def send_email(to_email, subject, html_content):
     import smtplib
