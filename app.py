@@ -13,33 +13,33 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # max 16MB upload
 app.secret_key = 'dev-secret-key-123'
 
 # DB connection info — replace with your credentials
-DB_HOST = 'localhost'
-DB_NAME = 'JiraCloneDB'
-DB_USER = 'postgres'
-DB_PASS = 'root'
-
-def get_db_conn():
-    return psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASS
-    )
+# DB_HOST = 'localhost'
+# DB_NAME = 'JiraCloneDB'
+# DB_USER = 'postgres'
+# DB_PASS = 'root'
 
 # def get_db_conn():
-#     url = os.environ.get('DATABASE_URL')
-#     if not url:
-#         raise Exception("DATABASE_URL not found in environment variables.")
+#     return psycopg2.connect(
+#         host=DB_HOST,
+#         dbname=DB_NAME,
+#         user=DB_USER,
+#         password=DB_PASS
+#     )
 
-#     parsed = urlparse(url)  
-#     db_config = {
-#         'dbname': parsed.path[1:],  
-#         'user': parsed.username,
-#         'password': parsed.password,
-#         'host': parsed.hostname,
-#         'port': parsed.port
-#     }
-#     return psycopg2.connect(**db_config)
+def get_db_conn():
+    url = os.environ.get('DATABASE_URL')
+    if not url:
+        raise Exception("DATABASE_URL not found in environment variables.")
+
+    parsed = urlparse(url)  
+    db_config = {
+        'dbname': parsed.path[1:],  
+        'user': parsed.username,
+        'password': parsed.password,
+        'host': parsed.hostname,
+        'port': parsed.port
+    }
+    return psycopg2.connect(**db_config)
 
 def send_email(to_email, subject, html_content):
     import smtplib
@@ -100,8 +100,8 @@ def invite_user():
     conn.close()
 
 
-    # invite_link = f"https://bug-free-production.up.railway.app/accept_invite?email={email}"
-    invite_link = f"http://localhost:5000/accept_invite?email={email}"
+    invite_link = f"https://bug-free-production.up.railway.app/accept_invite?email={email}"
+    # invite_link = f"http://localhost:5000/accept_invite?email={email}"
     html_body = f"""
     <html>
     <body>
@@ -226,17 +226,34 @@ def register():
     conn.close()
 
     # Send welcome email
+#     html_body = f"""
+#     <html>
+#     <body>
+#         <p>Hi {name},</p>
+#         <p>Welcome to <strong>BUG FREE</strong>! </p>
+#         <p>Your account has been successfully created. You can now <a href="http://localhost:5000/login">login here</a>.</p>
+#         <p>Happy bug tracking!<br>The BUG FREE Team</p>
+#     </body>
+#     </html>
+#     """
+
+#     try:
+#         send_email(email, "Welcome to BUG FREE!", html_body)
+#     except Exception as e:
+#         print(f"Failed to send welcome email: {e}")
+
+#     return redirect('/login')
+
     html_body = f"""
     <html>
     <body>
         <p>Hi {name},</p>
         <p>Welcome to <strong>BUG FREE</strong>! </p>
-        <p>Your account has been successfully created. You can now <a href="http://localhost:5000/login">login here</a>.</p>
+        <p>Your account has been successfully created. You can now <a href="https://bug-free-production.up.railway.app/login">login here</a>.</p>
         <p>Happy bug tracking!<br>The BUG FREE Team</p>
     </body>
     </html>
     """
-#  <p>Your account has been successfully created. You can now <a href="https://bug-free-production.up.railway.app/login">login here</a>.</p>
     try:
         send_email(email, "Welcome to BUG FREE!", html_body)
     except Exception as e:
@@ -588,6 +605,28 @@ def submit_ticket():
                 cur.close()
                 conn.close()
 
+                # if user:
+                #     assignee_name, assignee_email = user
+                #     html_content = f"""
+                #     <html>
+                #     <body>
+                #         <p>Hello {assignee_name},</p>
+                #         <p>You have been assigned a new ticket:</p>
+                #         <ul>
+                #             <li><strong>Summary:</strong> {summary}</li>
+                #             <li><strong>Description:</strong> {description}</li>
+                #             <li><strong>Project:</strong> {project}</li>
+                #             <li><strong>Work Type:</strong> {work_type}</li>
+                #             <li><strong>Status:</strong> {status}</li>
+                #             <li><strong>Game Name:</strong> {game_name}</li>
+                #         </ul>
+                #         <p>Please log in to <a href="http://localhost:5000">BUG FREE</a> to view the details.</p>
+                #     </body>
+                #     </html>
+                #     """
+                #     send_email(assignee_email, f"New Ticket Assigned: {summary}", html_content)
+                #     print(f"Email sent to {assignee_email}")
+
                 if user:
                     assignee_name, assignee_email = user
                     html_content = f"""
@@ -603,12 +642,13 @@ def submit_ticket():
                             <li><strong>Status:</strong> {status}</li>
                             <li><strong>Game Name:</strong> {game_name}</li>
                         </ul>
-                        <p>Please log in to <a href="http://localhost:5000">BUG FREE</a> to view the details.</p>
+                        <p>Please log in to <a href="https://bug-free-production.up.railway.app/">BUG FREE</a> to view the details.</p>
                     </body>
                     </html>
                     """
                     send_email(assignee_email, f"New Ticket Assigned: {summary}", html_content)
                     print(f"Email sent to {assignee_email}")
+                    
             except Exception as e:
                 print(f"Error sending email to assignee: {e}")
 
