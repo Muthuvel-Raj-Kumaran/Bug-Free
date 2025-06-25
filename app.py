@@ -12,34 +12,34 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # max 16MB upload
 app.secret_key = 'dev-secret-key-123'
 
-# # DB connection info — replace with your credentials
-# DB_HOST = 'localhost'
-# DB_NAME = 'JiraCloneDB'
-# DB_USER = 'postgres'
-# DB_PASS = 'root'
-
-# def get_db_conn():
-#     return psycopg2.connect(
-#         host=DB_HOST,
-#         dbname=DB_NAME,
-#         user=DB_USER,
-#         password=DB_PASS
-#     )
+# DB connection info — replace with your credentials
+DB_HOST = 'localhost'
+DB_NAME = 'JiraCloneDB'
+DB_USER = 'postgres'
+DB_PASS = 'root'
 
 def get_db_conn():
-    url = os.environ.get('DATABASE_URL')
-    if not url:
-        raise Exception("DATABASE_URL not found in environment variables.")
+    return psycopg2.connect(
+        host=DB_HOST,
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASS
+    )
 
-    parsed = urlparse(url)  
-    db_config = {
-        'dbname': parsed.path[1:],  
-        'user': parsed.username,
-        'password': parsed.password,
-        'host': parsed.hostname,
-        'port': parsed.port
-    }
-    return psycopg2.connect(**db_config)
+# def get_db_conn():
+#     url = os.environ.get('DATABASE_URL')
+#     if not url:
+#         raise Exception("DATABASE_URL not found in environment variables.")
+
+#     parsed = urlparse(url)  
+#     db_config = {
+#         'dbname': parsed.path[1:],  
+#         'user': parsed.username,
+#         'password': parsed.password,
+#         'host': parsed.hostname,
+#         'port': parsed.port
+#     }
+#     return psycopg2.connect(**db_config)
 
 def send_email(to_email, subject, html_content):
     import smtplib
@@ -99,7 +99,9 @@ def invite_user():
     cur.close()
     conn.close()
 
-    invite_link = f"https://bug-free-production.up.railway.app/accept_invite?email={email}"
+
+    # invite_link = f"https://bug-free-production.up.railway.app/accept_invite?email={email}"
+    invite_link = f"http://localhost:5000/accept_invite?email={email}"
     html_body = f"""
     <html>
     <body>
@@ -229,12 +231,12 @@ def register():
     <body>
         <p>Hi {name},</p>
         <p>Welcome to <strong>BUG FREE</strong>! </p>
-        <p>Your account has been successfully created. You can now <a href="https://bug-free-production.up.railway.app/login">login here</a>.</p>
+        <p>Your account has been successfully created. You can now <a href="http://localhost:5000/login">login here</a>.</p>
         <p>Happy bug tracking!<br>The BUG FREE Team</p>
     </body>
     </html>
     """
-
+#  <p>Your account has been successfully created. You can now <a href="https://bug-free-production.up.railway.app/login">login here</a>.</p>
     try:
         send_email(email, "Welcome to BUG FREE!", html_body)
     except Exception as e:
@@ -601,7 +603,7 @@ def submit_ticket():
                             <li><strong>Status:</strong> {status}</li>
                             <li><strong>Game Name:</strong> {game_name}</li>
                         </ul>
-                        <p>Please log in to <a href="https://bug-free-production.up.railway.app/">BUG FREE</a> to view the details.</p>
+                        <p>Please log in to <a href="http://localhost:5000">BUG FREE</a> to view the details.</p>
                     </body>
                     </html>
                     """
@@ -712,8 +714,10 @@ def delete_attachment(attachment_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
+
+# if __name__ == "__main__":
+#     port = int(os.environ.get("PORT", 5000))
+#     print("DEBUG: ENV VARS:", os.environ)
+#     app.run(host="0.0.0.0", port=port, debug=True)
