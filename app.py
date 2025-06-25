@@ -99,7 +99,7 @@ def invite_user():
     cur.close()
     conn.close()
 
-    invite_link = f"http://localhost:5000/accept_invite?email={email}"
+    invite_link = f"https://bug-free-production.up.railway.app/accept_invite?email={email}"
     html_body = f"""
     <html>
     <body>
@@ -229,7 +229,7 @@ def register():
     <body>
         <p>Hi {name},</p>
         <p>Welcome to <strong>BUG FREE</strong>! </p>
-        <p>Your account has been successfully created. You can now <a href="http://localhost:5000/login">login here</a>.</p>
+        <p>Your account has been successfully created. You can now <a href="https://bug-free-production.up.railway.app/login">login here</a>.</p>
         <p>Happy bug tracking!<br>The BUG FREE Team</p>
     </body>
     </html>
@@ -601,7 +601,7 @@ def submit_ticket():
                             <li><strong>Status:</strong> {status}</li>
                             <li><strong>Game Name:</strong> {game_name}</li>
                         </ul>
-                        <p>Please log in to <a href="http://localhost:5000">BUG FREE</a> to view the details.</p>
+                        <p>Please log in to <a href="https://bug-free-production.up.railway.app/">BUG FREE</a> to view the details.</p>
                     </body>
                     </html>
                     """
@@ -716,4 +716,4 @@ def delete_attachment(attachment_id):
 #     app.run(debug=True)
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=True)
