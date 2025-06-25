@@ -26,7 +26,7 @@ app.secret_key = 'dev-secret-key-123'
 #         password=DB_PASS
 #     )
 
-def get_connection():
+def get_db_conn():
     url = os.environ.get('DATABASE_URL')
     if not url:
         raise Exception("DATABASE_URL not found in environment variables.")
