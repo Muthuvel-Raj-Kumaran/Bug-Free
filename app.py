@@ -13,6 +13,7 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # max 16MB upload
 app.secret_key = 'dev-secret-key-123'
 
+
 def get_db_conn():
     url = os.getenv("DATABASE_URL")  
 
@@ -759,10 +760,10 @@ def delete_attachment(attachment_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)
 
-# if __name__ == "__main__":
-#     port = int(os.environ.get("PORT", 5000))
-#     print("DEBUG: ENV VARS:", os.environ)
-#     app.run(host="0.0.0.0", port=port, debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    print("DEBUG: ENV VARS:", os.environ)
+    app.run(host="0.0.0.0", port=port, debug=True)
