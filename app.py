@@ -111,11 +111,11 @@ def invite_user():
 
     if existing:
         return jsonify({'error': 'User already exists'}), 409
-
-    cur.execute("INSERT INTO users (email) VALUES (%s)", (email,))
-    conn.commit()
-    cur.close()
-    conn.close()
+    else:
+        cur.execute("INSERT INTO users (email) VALUES (%s)", (email,))
+        conn.commit()
+        cur.close()
+        conn.close() 
 
 
     invite_link = f"https://bug-free-production.up.railway.app/accept_invite?email={email}"
@@ -238,14 +238,14 @@ def register():
         cur.close()
         conn.close()
         return "Email already registered", 409
-
-    cur.execute(
+    else:
+        cur.execute(
         "INSERT INTO users (name, email, password, organization, is_active) VALUES (%s, %s, %s, %s, TRUE)",
         (name, email, hashed_pw, organization)
     )
     conn.commit()
     cur.close()
-    conn.close()
+    conn.close()    
 
     # Send welcome email
     # html_body = f"""
@@ -505,6 +505,40 @@ def get_project_assignees():
 
     return jsonify([{'id': row[0], 'name': row[1]} for row in rows])
 
+@app.route('/create_project', methods=['POST'])
+def create_project():
+    data = request.get_json()
+    print("Received JSON data:", data)
+    if not data:
+        return jsonify({'error': 'Missing JSON body'}), 400
+
+    game_name = data.get('game_name', '').strip()
+    phase = data.get('phase', '').strip()
+    category = data.get('category', '').strip()
+    print(f"Parsed values -> game_name: '{game_name}', phase: '{phase}', category: '{category}'")
+
+    if not game_name:
+        return jsonify({'error': 'Game name is required'}), 400
+
+    print(f"Creating project with: game_name={game_name}, phase={phase}, category={category}")
+
+    try:
+        conn = get_db_conn()
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO projects (game_name, phase, category, organization) VALUES (%s, %s, %s, %s)",
+            (game_name, phase, category, session['organization'])
+        )
+
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({'message': 'Project created successfully'})
+    except Exception as e:
+        print(f"Error creating project: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/projects', methods=['GET'])
 def get_projects():
     """
@@ -539,37 +573,6 @@ def get_projects():
     } for r in rows]
 
     return jsonify(projects)
-
-@app.route('/create_project', methods=['POST'])
-def create_project():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Missing JSON body'}), 400
-
-    game_name = data.get('game_name', '').strip()
-    phase = data.get('phase', '').strip()
-    category = data.get('category', '').strip()
-
-    if not game_name:
-        return jsonify({'error': 'Game name is required'}), 400
-
-    print(f"Creating project with: game_name={game_name}, phase={phase}, category={category}")
-
-    try:
-        conn = get_db_conn()
-        cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO projects (game_name, phase, category, organization) VALUES (%s, %s, %s, %s)",
-            (game_name, phase, category, session['organization'])
-        )
-
-        conn.commit()
-        cur.close()
-        conn.close()
-        return jsonify({'message': 'Project created successfully'})
-    except Exception as e:
-        print(f"Error creating project: {e}")
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/get_game_names', methods=['GET'])
 def get_game_names():

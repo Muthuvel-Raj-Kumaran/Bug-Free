@@ -301,7 +301,7 @@
           tr.innerHTML = `
             <td>${p.game_name}</td>
             <td>${p.phase}</td>
-            <td>${p.categories}</td>
+            <td>${p.category}</td>
           `;
           tr.style.cursor = 'pointer';
 
@@ -350,7 +350,8 @@
     fetch('/create_project', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ game_name: gameName, phase, categories })
+      body: JSON.stringify({ game_name: gameName, phase, category: categories })
+
     })
     .then(res => res.json())
     .then(data => {
