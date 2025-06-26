@@ -128,6 +128,8 @@
   align-items: center;
   padding: 1rem;
   z-index: 1000;
+  align-items: center;
+  padding: 1rem;
 
   visibility: hidden;
   opacity: 0;
@@ -516,13 +518,23 @@
   font-size: 1rem;
 }
 
+@media (max-height: 700px) {
+  .Create-ticket__content,
+  .ticket-detail-modal__content {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+}
+
+
 .ticket-detail-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-
+  align-items: center;
+  padding: 1rem;
   
   display: flex;
   justify-content: center;
@@ -622,13 +634,13 @@
   box-shadow: 0 0 8px 2px rgba(37, 99, 235, 0.25);
 }
 
-@media (max-width: 768px) {
-  .Create-ticket__content,
-  .ticket-detail-modal__content {
-    width: 95%;
-    padding: 1rem;
-  }
+.Create-ticket__content,
+.ticket-detail-modal__content {
+  max-height: 90vh;       /* so modal fits in viewport */
+  overflow-y: auto;       /* scroll content if too tall */
+  box-sizing: border-box; /* avoids layout bugs */
 }
+
 
 
 #detailAttachmentWrapper {
