@@ -13,17 +13,14 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # max 16MB upload
 app.secret_key = 'dev-secret-key-123'
 
-
 def get_db_conn():
-    url = os.getenv("DATABASE_URL")  
+    url = "postgresql://postgres:ijSbqfBUrFUBdaHjJBwFKogHmNyNxlyg@postgres.railway.internal:5432/railway"
 
-    if not url:
-        raise ValueError("DATABASE_URL environment variable is not set.")
-
+    from urllib.parse import urlparse
     parsed = urlparse(url)
 
     db_config = {
-        'dbname': parsed.path.lstrip('/'),
+        'dbname': parsed.path[1:],  
         'user': parsed.username,
         'password': parsed.password,
         'host': parsed.hostname,
