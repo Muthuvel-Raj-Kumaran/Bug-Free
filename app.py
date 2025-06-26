@@ -7,49 +7,22 @@ from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, session
 from urllib.parse import urlparse
+import smtplib
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # max 16MB upload
 app.secret_key = 'dev-secret-key-123'
 
-
-# DB connection info — replace with your credentials
-# DB_HOST = 'localhost'
-# DB_NAME = 'JiraCloneDB'
-# DB_USER = 'postgres'
-# DB_PASS = 'root'
-
-# def get_db_conn():
-#     return psycopg2.connect(
-#         host=DB_HOST,
-#         dbname=DB_NAME,
-#         user=DB_USER,
-#         password=DB_PASS
-#     )
-
-# def get_db_conn():
-#     url = os.environ.get('DATABASE_URL')
-#     if not url:
-#         raise Exception("DATABASE_URL not found in environment variables.")
-
-#     parsed = urlparse(url)  
-#     db_config = {
-#         'dbname': parsed.path[1:],  
-#         'user': parsed.username,
-#         'password': parsed.password,
-#         'host': parsed.hostname,
-#         'port': parsed.port
-#     }
-#     return psycopg2.connect(**db_config)
-
 def get_db_conn():
-    url = "postgresql://postgres:ijSbqfBUrFUBdaHjJBwFKogHmNyNxlyg@postgres.railway.internal:5432/railway"
+    url = os.getenv("DATABASE_URL")  
 
-    from urllib.parse import urlparse
+    if not url:
+        raise ValueError("DATABASE_URL environment variable is not set.")
+
     parsed = urlparse(url)
 
     db_config = {
-        'dbname': parsed.path[1:],  
+        'dbname': parsed.path.lstrip('/'),
         'user': parsed.username,
         'password': parsed.password,
         'host': parsed.hostname,
@@ -58,21 +31,23 @@ def get_db_conn():
 
     return psycopg2.connect(**db_config)
 
-
 def send_email(to_email, subject, html_content):
-    import smtplib
-    from email.message import EmailMessage
+    sender_email = os.getenv('EMAIL_ADDRESS')
+    sender_password = os.getenv('EMAIL_PASSWORD')
+
+    if not sender_email or not sender_password:
+        raise ValueError("Email credentials not set in environment variables.")
 
     msg = EmailMessage()
     msg['Subject'] = subject
-    msg['From'] = 'muthuvelraj2818@gmail.com'
+    msg['From'] = sender_email
     msg['To'] = to_email
     msg.set_content("This email requires an HTML-compatible viewer.")
     msg.add_alternative(html_content, subtype='html')
 
     with smtplib.SMTP('smtp.gmail.com', 587) as server:
         server.starttls()
-        server.login('muthuvelraj2818@gmail.com', 'kxgh igwf elbh xibo')
+        server.login(sender_email, sender_password)
         server.send_message(msg)
 
 @app.route('/')
@@ -784,10 +759,10 @@ def delete_attachment(attachment_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    print("DEBUG: ENV VARS:", os.environ)
-    app.run(host="0.0.0.0", port=port, debug=True)
+# if __name__ == "__main__":
+#     port = int(os.environ.get("PORT", 5000))
+#     print("DEBUG: ENV VARS:", os.environ)
+#     app.run(host="0.0.0.0", port=port, debug=True)
