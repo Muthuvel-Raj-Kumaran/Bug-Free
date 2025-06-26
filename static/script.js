@@ -78,9 +78,10 @@ document.getElementById('openModalBtn').addEventListener('click', () => {
       const result = await safeJson(response);
       if (response.ok) {
         form.reset();
-        document.getElementById('ticketModal').style.display = 'none';
+        document.getElementById('ticketModal').classList.remove('Create-ticket--active'); 
         loadTickets();
-      } else {
+      }
+ else {
         alert('Error: ' + (result?.error || response.statusText));
       }
     } catch (err) {
